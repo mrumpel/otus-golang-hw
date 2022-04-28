@@ -1,4 +1,4 @@
-module github.com/mrumpel/otus-golang-hw/tree/master/hw01_hello_otus
+module github.com/mrumpel/otus-golang-hw/hw01_hello_otus
 
 go 1.16
 
