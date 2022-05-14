@@ -17,11 +17,29 @@ func Unpack(str string) (string, error) {
 	var prev rune
 	var count int
 	var err error
-	pass := true
+	pass, escape := true, false
 	res := strings.Builder{}
 
 	for _, curr := range str {
-		if pass {
+		// Asterisk escape logic
+
+		if escape {
+			if !(unicode.IsDigit(curr) || curr == '\\') {
+				return "", ErrInvalidString
+			}
+
+			prev = curr
+			pass, escape = false, false
+
+			continue
+		}
+
+		if curr == '\\' {
+			escape = true
+		}
+
+		// Main work logic
+		if pass && !escape {
 			if unicode.IsDigit(curr) {
 				return "", ErrInvalidString
 			}
@@ -49,7 +67,11 @@ func Unpack(str string) (string, error) {
 		prev = curr
 	}
 
-	// last item
+	// Last item: check escape error & add
+	if escape {
+		return "", ErrInvalidString
+	}
+
 	if !pass {
 		res.WriteRune(prev)
 	}
