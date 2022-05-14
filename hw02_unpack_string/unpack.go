@@ -14,47 +14,43 @@ func Unpack(str string) (string, error) {
 		return "", nil
 	}
 
-	if unicode.IsDigit([]rune(str)[0]) {
-		return "", ErrInvalidString
-	}
-
 	var prev rune
 	var count int
 	var err error
-	unpacked := true
-
+	pass := true
 	res := strings.Builder{}
 
 	for _, curr := range str {
-		if unicode.IsDigit(curr) {
-
-			if unicode.IsDigit(prev) {
+		if pass {
+			if unicode.IsDigit(curr) {
 				return "", ErrInvalidString
 			}
 
+			prev = curr
+			pass = false
+
+			continue
+		}
+
+		if unicode.IsDigit(curr) {
 			count, err = strconv.Atoi(string(curr))
 			if err != nil {
 				return "", err
 			}
 
-			unpacked = true
-
-			if count != 0 {
-				res.WriteString(strings.Repeat(string(prev), count))
-			}
+			pass = true
 		} else {
-			if !unpacked {
-				res.WriteRune(prev)
-			}
-			unpacked = false
+			count = 1
+			pass = false
 		}
 
+		res.WriteString(strings.Repeat(string(prev), count))
+
 		prev = curr
-		count = 1
 	}
 
-	// for last unpair item
-	if !unpacked && count == 1 {
+	// last item
+	if !pass {
 		res.WriteRune(prev)
 	}
 
