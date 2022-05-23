@@ -7,7 +7,7 @@ import (
 )
 
 // Change to true if needed.
-var taskWithAsteriskIsCompleted = false
+var taskWithAsteriskIsCompleted = true
 
 var text = `Как видите, он  спускается  по  лестнице  вслед  за  своим
 	другом   Кристофером   Робином,   головой   вниз,  пересчитывая
@@ -44,10 +44,20 @@ var text = `Как видите, он  спускается  по  лестни�
 		В этот вечер...`
 
 func TestTop10(t *testing.T) {
+	// Zero return test zone
 	t.Run("no words in empty string", func(t *testing.T) {
 		require.Len(t, Top10(""), 0)
 	})
 
+	t.Run("only spaces", func(t *testing.T) {
+		require.Len(t, Top10("    \t\t\t \n\n\n"), 0)
+	})
+
+	t.Run("only spaces and punctuation", func(t *testing.T) {
+		require.Len(t, Top10(`!!!(??)--- [()] [.][]`), 0)
+	})
+
+	// Main test zone
 	t.Run("positive test", func(t *testing.T) {
 		if taskWithAsteriskIsCompleted {
 			expected := []string{
@@ -79,4 +89,53 @@ func TestTop10(t *testing.T) {
 			require.Equal(t, expected, Top10(text))
 		}
 	})
+
+	// Added tests
+
+	tests := []struct {
+		name   string
+		text   string
+		expect []string
+	}{
+		// for core task
+		{
+			name:   "Lex order with same count",
+			text:   "aa aa ab ab ac ac ad ad ba ba bc bc aab aab bb bb xx xx yy yy zz zz one two three four five",
+			expect: []string{"aa", "aab", "ab", "ac", "ad", "ba", "bb", "bc", "xx", "yy"},
+		},
+		{
+			name:   "Task example (less then 10) - edited for asterisk",
+			text:   "cat and dog, one dog,two cats and one man",
+			expect: []string{"and", "dog", "one", "cat", "cats", "man", "two"},
+		},
+		{
+			name:   "non-ascii symbols",
+			text:   "세계 안녕하세요 세계",
+			expect: []string{"세계", "안녕하세요"},
+		},
+
+		// For asterisk task
+		{
+			name:   "cases + punctuation",
+			text:   "Какой-то - какой-то - нога НОГА ноги",
+			expect: []string{"какой-то", "нога", "ноги"},
+		},
+
+		{
+			name:   "lot of punctuation",
+			text:   `"Какой-то - какой-то - ([-нога]) НОГА ноги!"-`,
+			expect: []string{"какой-то", "нога", "ноги"},
+		},
+		{
+			name:   "only cases",
+			text:   "HAND LEG leg leg lEg LeG",
+			expect: []string{"leg", "hand"},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			require.Equal(t, test.expect, Top10(test.text))
+		})
+	}
 }
