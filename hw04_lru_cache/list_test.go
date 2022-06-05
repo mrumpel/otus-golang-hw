@@ -102,6 +102,5 @@ func TestList(t *testing.T) {
 		require.Equal(t, 1, l.Back().Value)
 		require.Equal(t, i, l.Front().Next)
 		require.Equal(t, i, l.Back().Prev)
-
 	})
 }

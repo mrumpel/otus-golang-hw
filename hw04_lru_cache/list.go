@@ -110,7 +110,7 @@ func (l *list) MoveToFront(i *ListItem) {
 	i.Prev = nil
 
 	l.front = i
-	l.len++ //.Remove compensation
+	l.len++ // .Remove compensation
 }
 
 func (l *list) addFirstItem(i *ListItem) {
