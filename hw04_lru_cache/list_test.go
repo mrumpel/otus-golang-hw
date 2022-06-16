@@ -48,4 +48,59 @@ func TestList(t *testing.T) {
 		}
 		require.Equal(t, []int{70, 80, 60, 40, 10, 30, 50}, elems)
 	})
+
+	t.Run("check middle + remove last", func(t *testing.T) {
+		l := NewList()
+		l.PushFront(1)
+		i := l.Front()
+
+		l.PushFront(1)
+		l.PushBack(1)
+
+		// first added item in the middle and OK
+		require.Equal(t, i, l.Front().Next)
+		require.Equal(t, i, l.Back().Prev)
+		require.Equal(t, l.Front(), i.Prev)
+		require.Equal(t, l.Back(), i.Next)
+		require.Equal(t, 3, l.Len())
+
+		// remove corners and check that middle exists and OK
+		l.Remove(l.Front())
+		l.Remove(l.Back())
+		require.Equal(t, 1, l.Len())
+		require.Equal(t, i, l.Front())
+		require.Equal(t, i, l.Back())
+
+		// result after last item removing
+		l.Remove(l.Front())
+		require.Equal(t, 0, l.Len())
+		require.Nil(t, l.Front())
+		require.Nil(t, l.Back())
+	})
+
+	t.Run("move to front", func(t *testing.T) {
+		l := NewList()
+
+		l.PushBack(1)
+		l.PushBack(2)
+		i := l.Back()
+		l.PushBack(3)
+
+		// no changes
+		l.MoveToFront(l.Front())
+		require.Equal(t, 1, l.Front().Value)
+		require.Equal(t, i, l.Front().Next)
+
+		// 1 and 2 swap
+		l.MoveToFront(i)
+		require.Equal(t, 2, l.Front().Value)
+		require.Equal(t, i, l.Front())
+
+		// reversed, i at the middle again
+		l.MoveToFront(l.Back())
+		require.Equal(t, 3, l.Front().Value)
+		require.Equal(t, 1, l.Back().Value)
+		require.Equal(t, i, l.Front().Next)
+		require.Equal(t, i, l.Back().Prev)
+	})
 }
