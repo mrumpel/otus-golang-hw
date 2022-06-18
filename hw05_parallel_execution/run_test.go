@@ -67,4 +67,56 @@ func TestRun(t *testing.T) {
 		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
 		require.LessOrEqual(t, int64(elapsedTime), int64(sumTime/2), "tasks were run sequentially?")
 	})
+
+	t.Run("if M <= 0 ignore all errors and run all tasks", func(t *testing.T) {
+		tasksCount := 50
+		tasks := make([]Task, 0, tasksCount)
+
+		var runTasksCount int32
+
+		for i := 0; i < tasksCount; i++ {
+			err := fmt.Errorf("error from task %d", i)
+			tasks = append(tasks, func() error {
+				time.Sleep(time.Millisecond * time.Duration(rand.Intn(100)))
+				atomic.AddInt32(&runTasksCount, 1)
+				return err
+			})
+		}
+
+		workersCount := 10
+		maxErrorsCount := -23
+		err := Run(tasks, workersCount, maxErrorsCount)
+
+		require.NoError(t, err)
+		require.Equal(t, int(runTasksCount), tasksCount)
+	})
+
+	// asterisk test - check multiple goroutines exists without time.Sleep
+	t.Run("there is 10 workers taken tasks together", func(t *testing.T) {
+		tasksCount := 15
+		tasks := make([]Task, 0, tasksCount)
+
+		var runTasksCount int32
+
+		c := make(chan struct{}, tasksCount)
+
+		for i := 0; i < tasksCount; i++ {
+			tasks = append(tasks, func() error {
+				atomic.AddInt32(&runTasksCount, 1)
+				<-c
+				return nil
+			})
+		}
+
+		workersCount := 10
+
+		go Run(tasks, workersCount, 1)
+
+		require.Eventually(t, func() bool {
+			return atomic.LoadInt32(&runTasksCount) == int32(workersCount)
+		},
+			time.Second, time.Millisecond, "not enough workers")
+
+		close(c)
+	})
 }
