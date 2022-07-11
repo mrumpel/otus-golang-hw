@@ -19,12 +19,54 @@ func TestCopy(t *testing.T) {
 		error        error
 		untypedError bool
 	}{
-		{name: "out_offset0_limit0", in: "testdata/input.txt", out: "testdata/out_offset0_limit0.txt", offset: 0, limit: 0, error: nil},
-		{name: "out_offset0_limit10", in: "testdata/input.txt", out: "testdata/out_offset0_limit10.txt", offset: 0, limit: 10, error: nil},
-		{name: "out_offset0_limit1000", in: "testdata/input.txt", out: "testdata/out_offset0_limit1000.txt", offset: 0, limit: 1000, error: nil},
-		{name: "out_offset0_limit10000", in: "testdata/input.txt", out: "testdata/out_offset0_limit10000.txt", offset: 0, limit: 10000, error: nil},
-		{name: "out_offset100_limit1000", in: "testdata/input.txt", out: "testdata/out_offset100_limit1000.txt", offset: 100, limit: 1000, error: nil},
-		{name: "out_offset6000_limit1000", in: "testdata/input.txt", out: "testdata/out_offset6000_limit1000.txt", offset: 6000, limit: 1000, error: nil},
+		{
+			name:   "out_offset0_limit0",
+			in:     "testdata/input.txt",
+			out:    "testdata/out_offset0_limit0.txt",
+			offset: 0,
+			limit:  0,
+			error:  nil,
+		},
+		{
+			name:   "out_offset0_limit10",
+			in:     "testdata/input.txt",
+			out:    "testdata/out_offset0_limit10.txt",
+			offset: 0,
+			limit:  10,
+			error:  nil,
+		},
+		{
+			name:   "out_offset0_limit1000",
+			in:     "testdata/input.txt",
+			out:    "testdata/out_offset0_limit1000.txt",
+			offset: 0,
+			limit:  1000,
+			error:  nil,
+		},
+		{
+			name:   "out_offset0_limit10000",
+			in:     "testdata/input.txt",
+			out:    "testdata/out_offset0_limit10000.txt",
+			offset: 0,
+			limit:  10000,
+			error:  nil,
+		},
+		{
+			name:   "out_offset100_limit1000",
+			in:     "testdata/input.txt",
+			out:    "testdata/out_offset100_limit1000.txt",
+			offset: 100,
+			limit:  1000,
+			error:  nil,
+		},
+		{
+			name:   "out_offset6000_limit1000",
+			in:     "testdata/input.txt",
+			out:    "testdata/out_offset6000_limit1000.txt",
+			offset: 6000,
+			limit:  1000,
+			error:  nil,
+		},
 		{
 			name: "empty file",
 			in:   "testdata/empty.txt",
@@ -70,6 +112,8 @@ func TestCopy(t *testing.T) {
 }
 
 func checkEqual(t *testing.T, f1, f2 string) {
+	t.Helper()
+
 	w1 := sha256.New()
 	w2 := sha256.New()
 

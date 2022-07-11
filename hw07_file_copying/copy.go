@@ -62,7 +62,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		_, err = io.CopyN(barWriter, fromFile, limit)
 	}
 
-	if err != nil && err != io.EOF {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return err
 	}
 
