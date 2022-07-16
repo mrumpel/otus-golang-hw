@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -15,17 +18,39 @@ func TestReadDir(t *testing.T) {
 	})
 
 	t.Run("empty directory", func(t *testing.T) {
-		env, err := ReadDir("testdata/emptydir")
+		dir, err := ioutil.TempDir("", "")
+		fmt.Println(dir)
+		if err != nil {
+			t.Fail()
+		}
+
+		env, err := ReadDir(dir)
 
 		require.Nil(t, err)
 		require.Len(t, env, 0)
+
+		err = os.RemoveAll(dir)
+		if err != nil {
+			t.Fail()
+		}
 	})
 
 	t.Run("dir inside", func(t *testing.T) {
+		dir, err := ioutil.TempDir("testdata/dirinside", "")
+		fmt.Println(dir)
+		if err != nil {
+			t.Fail()
+		}
+
 		env, err := ReadDir("testdata/dirinside")
 
 		require.Nil(t, err)
 		require.Len(t, env, 1, "nested dir not skipped")
+
+		err = os.RemoveAll(dir)
+		if err != nil {
+			t.Fail()
+		}
 	})
 
 	t.Run("read simple files", func(t *testing.T) {
