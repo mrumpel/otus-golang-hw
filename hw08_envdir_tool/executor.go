@@ -10,11 +10,13 @@ import (
 func RunCmd(cmd []string, env Environment) (returnCode int) {
 	// 1: prepare args and exec
 	var args []string
+
 	if len(cmd) > 1 {
 		args = cmd[1:]
 	}
+	comma := cmd[0]
 
-	e := exec.Command(cmd[0], args...)
+	e := exec.Command(comma, args...)
 	e.Stdout = os.Stdout
 	e.Stdin = os.Stdin
 	e.Stderr = os.Stderr
@@ -30,9 +32,7 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 
 	err = e.Wait()
 	if err != nil {
-		if exerr, ok := err.(*exec.ExitError); ok {
-			return exerr.ProcessState.ExitCode()
-		}
+		return e.ProcessState.ExitCode()
 	}
 
 	return 0

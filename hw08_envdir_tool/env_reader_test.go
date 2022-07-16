@@ -1,10 +1,12 @@
 package main
 
-import "testing"
-import "github.com/stretchr/testify/require"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
 
 func TestReadDir(t *testing.T) {
-
 	t.Run("no directory", func(t *testing.T) {
 		env, err := ReadDir("dir_does_not_exist")
 
@@ -64,5 +66,4 @@ func TestEvaluateEnvValue(t *testing.T) {
 			require.Equal(t, test.out, res)
 		})
 	}
-
 }

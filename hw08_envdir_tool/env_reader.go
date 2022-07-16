@@ -55,7 +55,6 @@ func ReadDir(dir string) (Environment, error) {
 		envs[item.Name()] = EnvValue{
 			Value: evaluateEnvValue(scanner.Bytes()),
 		}
-
 	}
 
 	return envs, nil

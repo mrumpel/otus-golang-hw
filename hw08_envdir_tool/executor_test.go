@@ -38,7 +38,6 @@ func TestRunCmd(t *testing.T) {
 }
 
 func TestPrepareEnvs(t *testing.T) {
-
 	t.Run("no deletions", func(t *testing.T) {
 		ed := make(Environment)
 		envs := []string{"one=001", "two=002"}
