@@ -3,9 +3,9 @@ package hw09structvalidator
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/require"
-	_ "github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type UserRole string
@@ -20,6 +20,11 @@ type (
 		Role   UserRole `validate:"in:admin,stuff"`
 		Phones []string `validate:"len:11"`
 		meta   json.RawMessage
+	}
+
+	SuperUser struct {
+		id    string
+		Roles []UserRole `validate:"in:admin,stuff,manager"`
 	}
 
 	App struct {
@@ -75,10 +80,7 @@ func TestValidate(t *testing.T) {
 
 		// simple
 		{
-			in:                     App{Version: "12345"},
-			expectedErr:            nil,
-			expectedValidationErrs: nil,
-			fails:                  nil,
+			in: App{Version: "12345"},
 		},
 		{
 			in:                     App{Version: "1234"},
@@ -86,61 +88,46 @@ func TestValidate(t *testing.T) {
 			fails:                  []string{"Version", "5"},
 		},
 		{
-			in:                     AppR{Version: "1234567890"},
-			expectedErr:            nil,
-			expectedValidationErrs: nil,
-			fails:                  nil,
+			in: AppR{Version: "1234567890"},
 		},
 		{
 			in:                     AppR{Version: "ASDF 2.5"},
-			expectedErr:            nil,
 			expectedValidationErrs: []error{errRegex},
 			fails:                  []string{"d+", "Version"},
 		},
 		{
-			in:                     AppI{Version: "two"},
-			expectedErr:            nil,
-			expectedValidationErrs: nil,
-			fails:                  nil,
+			in: AppI{Version: "two"},
 		},
 		{
 			in:                     AppI{Version: "four"},
-			expectedErr:            nil,
 			expectedValidationErrs: []error{errIn},
 			fails:                  []string{"one,two,three", "Version"},
 		},
 		{
-			in:                     Num{Number: 30},
-			expectedErr:            nil,
-			expectedValidationErrs: nil,
-			fails:                  nil,
+			in: Num{Number: 30},
 		},
 		{
 			in:                     Num{Number: 100},
-			expectedErr:            nil,
 			expectedValidationErrs: []error{errMax, errIn},
 			fails:                  []string{"20,60", "50", "Number"},
 		},
 		{
 			in:                     Num{Number: -1},
-			expectedErr:            nil,
 			expectedValidationErrs: []error{errMin, errIn},
 			fails:                  []string{"20,60", "10", "Number"},
 		},
+
 		// complex
 		{
 			in: User{
 				ID:     "0000000000",
-				Name:   "Means Noth",
+				Name:   "Means North",
 				Age:    24,
 				Email:  "means@noth.io",
 				Role:   "admin",
 				Phones: []string{"00000000000", "11111111111"},
 				meta:   nil,
 			},
-			expectedErr:            nil,
-			expectedValidationErrs: nil,
-			fails:                  nil,
 		},
 		{
 			in: User{
@@ -150,11 +137,14 @@ func TestValidate(t *testing.T) {
 				Email:  "means.noth.io",
 				Role:   "nice_guy",
 				Phones: []string{"000000000001", "1111"},
-				meta:   nil,
 			},
-			expectedErr:            nil,
 			expectedValidationErrs: []error{errLen, errMax, errRegex, errIn, errLen, errLen},
 			fails:                  []string{"ID", "Email", "Role", "Phones"},
+		},
+		{
+			in:                     SuperUser{id: "", Roles: []UserRole{"admin", "manager", "employee"}},
+			expectedValidationErrs: []error{errIn},
+			fails:                  []string{"Roles"},
 		},
 
 		// test software errors
@@ -167,16 +157,17 @@ func TestValidate(t *testing.T) {
 			fails:       []string{"404,505"},
 		},
 		{
-			in:                     ValidationErrors{ValidationError{Err: nil, Field: "myField"}},
-			expectedErr:            errNotSupportedFieldType,
-			expectedValidationErrs: nil,
-			fails:                  nil,
+			in:          ValidationErrors{ValidationError{Err: nil, Field: "myField"}},
+			expectedErr: errNotSupportedFieldType,
 		},
 		{
-			in:                     Password{FirstLetter: "Q", OtherLetters: "werty"},
-			expectedErr:            errWrongValidationType,
-			expectedValidationErrs: nil,
-			fails:                  []string{"nolen", "OtherLetters"},
+			in:          Password{FirstLetter: "Q", OtherLetters: "werty"},
+			expectedErr: errWrongValidationType,
+			fails:       []string{"nolen", "OtherLetters"},
+		},
+		{
+			in:          UserRole("manager"),
+			expectedErr: errNotAStruct,
 		},
 	}
 
@@ -207,11 +198,10 @@ func TestValidate(t *testing.T) {
 				require.ErrorAs(t, err, &e)
 			}
 
-			// check expected words present
+			// check expected words
 			for _, f := range tt.fails {
 				require.ErrorContains(t, err, f)
 			}
-
 		})
 	}
 }

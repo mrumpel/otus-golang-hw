@@ -17,7 +17,6 @@ type ValidationError struct {
 type ValidationErrors []ValidationError
 
 func (v ValidationErrors) Error() string {
-
 	b := strings.Builder{}
 	for _, e := range v {
 		b.WriteString(e.Error())
@@ -36,17 +35,17 @@ func (e ValidationError) Unwrap() error {
 
 const validateTagKey = "validate"
 
-// processing errors
+// software errors.
 var (
-	errNotAStruct            = errors.New("Not a struct")
-	errNotSupportedFieldType = errors.New("Not supported field type")
-	errWrongValidationType   = errors.New("Wrong validation type ")
-	errWrongValidationValue  = errors.New("Wrong validation value ")
+	errNotAStruct            = errors.New("not a struct")
+	errNotSupportedFieldType = errors.New("not supported field type")
+	errWrongValidationType   = errors.New("wrong validation type ")
+	errWrongValidationValue  = errors.New("wrong validation value ")
 )
 
-// validation errors
+// validation errors.
 var (
-	errValidation = errors.New("Invalid")
+	errValidation = errors.New("invalid")
 	errMin        = fmt.Errorf("%w min: less then", errValidation)
 	errMax        = fmt.Errorf("%w max: greater then", errValidation)
 	errIn         = fmt.Errorf("%w in: not in", errValidation)
@@ -103,7 +102,7 @@ func Validate(v interface{}) error {
 func validateTag(v reflect.Value, name, valType, valValue string) error {
 	var err error
 
-	switch v.Kind() {
+	switch v.Kind() { //nolint:exhaustive
 	case reflect.Int:
 		f, makeErr := makeIntValidator(name, valType, valValue)
 		if makeErr != nil {
@@ -121,26 +120,28 @@ func validateTag(v reflect.Value, name, valType, valValue string) error {
 
 		err = f(t)
 
-		//TODO дополнить разбор слайса обёрток
 	case reflect.Slice:
-		if t, ok := v.Interface().([]int); ok {
+
+		if v.Type().Elem().Kind() == reflect.Int {
 			f, makeErr := makeIntValidator(name, valType, valValue)
 			if makeErr != nil {
 				return makeErr
 			}
-			err = validateIntSlice(t, f)
+			err = validateIntSlice(v, f)
 			break
 		}
 
-		if t, ok := v.Interface().([]string); ok {
+		if v.Type().Elem().Kind() == reflect.String {
 			f, makeErr := makeStringValidator(name, valType, valValue)
 			if makeErr != nil {
 				return makeErr
 			}
-			err = validateStringSlice(t, f)
+			err = validateStringSlice(v, f)
 			break
 		}
+
 		err = errNotSupportedFieldType
+
 	default:
 		err = errNotSupportedFieldType
 	}
@@ -148,36 +149,45 @@ func validateTag(v reflect.Value, name, valType, valValue string) error {
 	return err
 }
 
-func validateIntSlice(arr []int, f func(int) error) error {
+func validateIntSlice(v reflect.Value, f func(int) error) error {
 	var errs ValidationErrors
-	for _, x := range arr {
+	for i := 0; i < v.Len(); i++ {
+		x := int(v.Index(i).Int())
 		err := f(x)
 		if err == nil {
 			continue
 		}
-		e, ok := err.(ValidationError)
+
+		var e ValidationError
+		ok := errors.As(err, &e)
 		if !ok {
 			return err
 		}
+		e.Err = fmt.Errorf("%w at position %v", e.Err, i)
 		errs = append(errs, e)
 	}
+
 	if len(errs) == 0 {
 		return nil
 	}
 	return errs
 }
 
-func validateStringSlice(arr []string, f func(string) error) error {
+func validateStringSlice(v reflect.Value, f func(string) error) error {
 	var errs ValidationErrors
-	for _, x := range arr {
+	for i := 0; i < v.Len(); i++ {
+		x := v.Index(i).String()
 		err := f(x)
 		if err == nil {
 			continue
 		}
-		e, ok := err.(ValidationError)
+
+		var e ValidationError
+		ok := errors.As(err, &e)
 		if !ok {
 			return err
 		}
+		e.Err = fmt.Errorf("%w at position %v", e.Err, i)
 		errs = append(errs, e)
 	}
 	if len(errs) == 0 {
@@ -244,7 +254,6 @@ func makeIntValidator(name, tag, value string) (func(int) error, error) {
 
 	default:
 		return nil, fmt.Errorf("%w %v", errWrongValidationType, value)
-
 	}
 
 	return f, nil
@@ -252,7 +261,6 @@ func makeIntValidator(name, tag, value string) (func(int) error, error) {
 
 func makeStringValidator(name, tag, value string) (func(string) error, error) {
 	var f func(string) error
-
 	switch tag {
 	case "len":
 		intvalue, err := strconv.Atoi(value)
