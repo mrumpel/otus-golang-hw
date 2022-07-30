@@ -39,10 +39,16 @@ func TestGetDomainStat(t *testing.T) {
 		require.Equal(t, DomainStat{}, result)
 	})
 
-	t.Run("no email", func(t *testing.T) {
+	t.Run("not an email", func(t *testing.T) {
 		res, err := GetDomainStat(bytes.NewBufferString("{\"Id\":2,\"Name\":\"Jesse Vasquez\",\"Username\":\"qRichardson\",\"Email\":\"mLynchbroWsecat.com\",\"Phone\":\"9-373-949-64-00\",\"Password\":\"SiZLeNSGn\",\"Address\":\"Fulton Hill 80\"}"), "ru")
 		require.NoError(t, err)
 		require.Len(t, res, 0)
+	})
+
+	t.Run("error a JSON", func(t *testing.T) {
+		result, err := GetDomainStat(bytes.NewBufferString("{\"\":,\"Name\":\"Howard Mendoza\",\"Username\":\"0Oliver\",\"Email\":\"aliquid_qui_ea@Browsedrive.gov\",\"Phone\":\"6-866-899-36-79\",\"Password\":\"InAQJvsq\",\"Address\":\"Blackbird Place 25\"}"), "gov")
+		require.Error(t, err)
+		require.Nil(t, result)
 	})
 
 }
