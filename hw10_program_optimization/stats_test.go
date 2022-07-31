@@ -55,10 +55,21 @@ func TestGetDomainStat(t *testing.T) {
 
 func BenchmarkGetDomainStatLong(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		r, _ := zip.OpenReader("testdata/users.dat.zip")
-		data, _ := r.File[0].Open()
-		_, _ = GetDomainStat(data, "biz")
-		r.Close()
+		func() {
+			b.StopTimer()
+			r, err := zip.OpenReader("testdata/users.dat.zip")
+			require.NoError(b, err)
+			defer r.Close()
+
+			data, err := r.File[0].Open()
+			require.NoError(b, err)
+
+			b.StartTimer()
+			stat, err := GetDomainStat(data, "biz")
+			b.StopTimer()
+			require.Len(b, stat, 383)
+			require.NoError(b, err)
+		}()
 	}
 }
 
@@ -70,6 +81,10 @@ var shortData string = `{"Id":1,"Name":"Howard Mendoza","Username":"0Oliver","Em
 
 func BenchmarkGetDomainStatShort(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, _ = GetDomainStat(bytes.NewBufferString(shortData), "linktype")
+		b.StartTimer()
+		stat, err := GetDomainStat(bytes.NewBufferString(shortData), "linktype")
+		b.StopTimer()
+		require.Len(b, stat, 0)
+		require.NoError(b, err)
 	}
 }
