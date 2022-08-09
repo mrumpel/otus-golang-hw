@@ -30,12 +30,11 @@ func main() {
 	// 3: create client + establish connection
 	client := NewTelnetClient(addr, t, os.Stdin, os.Stdout)
 
-	err := client.Connect()
-	defer client.Close()
-	if err != nil {
+	if err := client.Connect(); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, "error in connection: ", err)
-		os.Exit(1)
+		return
 	}
+	defer client.Close()
 	_, _ = fmt.Fprintln(os.Stderr, "...Connected to", addr)
 
 	// 4: run writer and reader
