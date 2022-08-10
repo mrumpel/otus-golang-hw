@@ -14,7 +14,7 @@ import (
 func main() {
 	// 1: parse flags and parameters
 	var t time.Duration
-	flag.DurationVar(&t, "timeout", 0, "setup tcp connection timeout")
+	flag.DurationVar(&t, "timeout", 10, "setup tcp connection timeout")
 	flag.Parse()
 
 	if flag.NArg() != 2 {

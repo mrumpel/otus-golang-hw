@@ -47,7 +47,6 @@ func (t *telClient) Send() (err error) {
 }
 
 func (t *telClient) Receive() (err error) {
-	//_, err := io.Copy(t.out, t.conn)
 	s := bufio.NewScanner(t.conn)
 	for s.Scan() {
 		_, err = t.out.Write(append(s.Bytes(), '\n'))
