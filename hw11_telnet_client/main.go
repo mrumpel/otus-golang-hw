@@ -31,11 +31,11 @@ func main() {
 	client := NewTelnetClient(addr, t, os.Stdin, os.Stdout)
 
 	if err := client.Connect(); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, "error in connection: ", err)
+		fmt.Fprintln(os.Stderr, "error in connection: ", err)
 		return
 	}
 	defer client.Close()
-	_, _ = fmt.Fprintln(os.Stderr, "...Connected to", addr)
+	fmt.Fprintln(os.Stderr, "...Connected to", addr)
 
 	// 4: run writer and reader
 	go func() {
@@ -45,7 +45,7 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			return
 		}
-		_, _ = fmt.Fprintln(os.Stderr, "...Connection was closed by peer")
+		fmt.Fprintln(os.Stderr, "...Connection was closed by peer")
 	}()
 
 	go func() {

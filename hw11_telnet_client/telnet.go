@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"io"
 	"net"
 	"time"
@@ -31,32 +30,13 @@ func (t *telClient) Close() error {
 	return t.conn.Close()
 }
 
-func (t *telClient) Send() (err error) {
-	s := bufio.NewScanner(t.in)
-	for s.Scan() {
-		_, err = t.conn.Write(append(s.Bytes(), '\n'))
-		if err != nil {
-			return
-		}
-	}
-
-	if s.Err() != nil {
-		err = s.Err()
-	}
+func (t *telClient) Send() error {
+	_, err := io.Copy(t.conn, t.in)
 	return err
 }
 
-func (t *telClient) Receive() (err error) {
-	s := bufio.NewScanner(t.conn)
-	for s.Scan() {
-		_, err = t.out.Write(append(s.Bytes(), '\n'))
-		if err != nil {
-			return
-		}
-	}
-	if s.Err() != nil {
-		err = s.Err()
-	}
+func (t *telClient) Receive() error {
+	_, err := io.Copy(t.out, t.conn)
 	return err
 }
 
