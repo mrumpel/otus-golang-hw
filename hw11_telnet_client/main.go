@@ -14,7 +14,7 @@ import (
 func main() {
 	// 1: parse flags and parameters
 	var t time.Duration
-	flag.DurationVar(&t, "timeout", 0, "setup tcp connection timeout")
+	flag.DurationVar(&t, "timeout", 10, "setup tcp connection timeout")
 	flag.Parse()
 
 	if flag.NArg() != 2 {
@@ -42,7 +42,7 @@ func main() {
 		defer cancel()
 		err := client.Receive()
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 			return
 		}
 		_, _ = fmt.Fprintln(os.Stderr, "...Connection was closed by peer")
@@ -52,10 +52,10 @@ func main() {
 		defer cancel()
 		err := client.Send()
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 			return
 		}
-		_, _ = fmt.Fprintln(os.Stderr, "...EOF")
+		fmt.Fprintln(os.Stderr, "...EOF")
 	}()
 
 	// 5: wait till the end
