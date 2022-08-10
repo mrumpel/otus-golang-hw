@@ -62,4 +62,31 @@ func TestTelnetClient(t *testing.T) {
 
 		wg.Wait()
 	})
+
+	t.Run("timeout", func(t *testing.T) {
+		in := &bytes.Buffer{}
+		out := &bytes.Buffer{}
+
+		timeout := 1 * time.Second
+		addr := "avito.ru:88"
+
+		client := NewTelnetClient(addr, timeout, ioutil.NopCloser(in), out)
+
+		err := client.Connect()
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "timeout")
+	})
+
+	t.Run("no address", func(t *testing.T) {
+		in := &bytes.Buffer{}
+		out := &bytes.Buffer{}
+
+		addr := ""
+
+		client := NewTelnetClient(addr, 0, ioutil.NopCloser(in), out)
+
+		err := client.Connect()
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "address")
+	})
 }
