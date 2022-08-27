@@ -1,5 +1,13 @@
 [logger]
 level = "INFO"
+path = "/tmp/calendar.log"
 
-# TODO
-# ...
+[storage]
+type = "postgres"
+connectionstring = "localhost:5438:test_db"
+user = "db_user"
+pass = "qwerty"
+
+[server]
+host = "localhost"
+port = "1984"
