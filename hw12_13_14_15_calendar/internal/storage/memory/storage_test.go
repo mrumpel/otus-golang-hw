@@ -16,8 +16,7 @@ import (
 func TestStorage(t *testing.T) {
 	t.Run("storage creating", func(t *testing.T) {
 		s := *New()
-		require.NotNil(t, s.m)
-		require.NotEmpty(t, s.m)
+		require.NotNil(t, s.events)
 	})
 
 	t.Run("create and check event", func(t *testing.T) {

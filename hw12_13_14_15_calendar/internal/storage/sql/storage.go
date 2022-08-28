@@ -11,7 +11,7 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib" // driver
 	"github.com/jmoiron/sqlx"
 	"github.com/mrumpel/otus-golang-hw/hw12_13_14_15_calendar/internal/storage"
-	"github.com/pressly/goose/v3"
+	goose "github.com/pressly/goose/v3"
 )
 
 type Storage struct {

@@ -8,7 +8,7 @@ import (
 )
 
 type Logger struct {
-	*logrus.Logger
+	logg *logrus.Logger
 }
 
 var errLogCreateStr = "fail in creating logger: %w"
@@ -33,4 +33,20 @@ func New(logLevel, path string) (*Logger, error) {
 	l.SetOutput(file)
 
 	return &Logger{l}, nil
+}
+
+func (l *Logger) Info(args ...interface{}) {
+	l.logg.Info(args...)
+}
+
+func (l *Logger) Error(args ...interface{}) {
+	l.logg.Error(args...)
+}
+
+func (l *Logger) Debug(args ...interface{}) {
+	l.logg.Debug(args...)
+}
+
+func (l *Logger) Warn(args ...interface{}) {
+	l.logg.Warn(args...)
 }
