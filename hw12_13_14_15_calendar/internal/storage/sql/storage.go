@@ -19,6 +19,7 @@ type Storage struct {
 }
 
 var errDBStr = "postgres database error: %w"
+var errDBMigration = "migration error: %w"
 
 //go:embed migrations/*.sql
 var embedMigrations embed.FS
@@ -41,13 +42,11 @@ func (s *Storage) Connect(ctx context.Context, connectionString string) error {
 
 	// migration part
 	goose.SetBaseFS(embedMigrations)
-
 	if err := goose.SetDialect("postgres"); err != nil {
-		panic(err)
+		return fmt.Errorf(errDBMigration, err)
 	}
-
 	if err := goose.Up(s.db.DB, "migrations"); err != nil {
-		panic(err)
+		return fmt.Errorf(errDBMigration, err)
 	}
 
 	return nil
